@@ -43,6 +43,20 @@ contract Lottery {
         nextId++;
     }
 
+    function redeemPrize(bytes memory _name) external {
+        require(
+            lotteries[nameToId[_name]].finishDate >= block.timestamp,
+            "Lottery is not over Yet"
+        );
+
+        lotteries[nameToId[_name]].isOver = true;
+        uint256 brutePrize = lotteries[nameToId[_name]].finalResult;
+        lotteries[nameToId[_name]].finalResult = 0;
+        payable(msg.sender).transfer(brutePrize);
+
+        //GET THE RESULT FROM THE CHAINLINK FUNCTION HERE
+    }
+
     function enterOnLottery(bytes memory _name, uint256 _ticketNumber)
         external
         payable
@@ -53,6 +67,7 @@ contract Lottery {
         //     "This lottery is over! Check [FUNC] to check who is the winner"
         // );
 
+        //check if time is up
         require(
             lotteries[nameToId[_name]].finishDate >= block.timestamp,
             "time is up!"
@@ -75,25 +90,10 @@ contract Lottery {
             "This ticket was already taken"
         );
 
-        //FROM HERE
-        lotteries[nextId] = LotteryStructure(
-            nextId, //id
-            false, //is over
-            _name, //name
-            block.timestamp + 10 minutes, //finish date
-            0, //currentBalance
-            0.001 ether, //min bid
-            0, // final result
-            0 //total tickets sold
-        );
-
         lotteries[nextId].currentBalance += msg.value;
         lotteries[nextId].totalTicketsSold += 1;
         eachTicket[nextId][_ticketNumber] = msg.sender;
+
         // mapping(uint256 => mapping(uint256 => address)) eachTicket; //nextId,ticket number,address - the same address can buy more than one ticket
-
-        nextId++;
-
-        // require(abi.encodePacked().length > 0, "NUMBER ALREADY PICKET");
     }
 }
