@@ -233,6 +233,16 @@ module.exports = async () => {
       "0xa36085F69e2889c224210F603D836748e7dC0088"
     );
 
+    // const tx = await vrn.getRandomNumber();
+    // console.log(tx);
+
+    let randomResult = await vrn.randomResult.call();
+    console.log(parseFloat(randomResult));
+    // console.log(BigInt(randomResult).toString());
+    console.log(BigInt(randomResult).toString().slice(0, 2));
+
+    // let a = 1.245641232134566e10;
+
     // console.log(vrn.address);
     // console.log(await linkToken.methods.balanceOf(account).call());
     // console.log(account);
