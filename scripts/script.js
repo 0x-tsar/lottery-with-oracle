@@ -230,7 +230,18 @@ module.exports = async () => {
       LINK_ABI,
       "0xa36085F69e2889c224210F603D836748e7dC0088"
     );
-    console.log(await linkToken.methods.name().call());
+
+    // const random = await vrn.getRandomNumber();
+    // console.log(random);
+
+    console.log(await linkToken.methods.balanceOf(vrn.address).call());
+    // console.log(
+    //   await linkToken.methods
+    //     .balanceOf("0xa36085F69e2889c224210F603D836748e7dC0088")
+    //     .call()
+    // );
+
+    // console.log(await linkToken.methods.name().call());
     // console.log(await linkToken.methods.name().call());
     // const [account, account2, account3, _] = await web3.eth.getAccounts();
     // console.log(`account ${account}`);
