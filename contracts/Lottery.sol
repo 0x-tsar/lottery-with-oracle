@@ -9,6 +9,9 @@ contract Lottery {
         admin = msg.sender;
     }
 
+    event evWinner(address winner, uint256 amount, uint256 timestamp);
+    event evCreateLottery(bytes name, uint256 prize, uint256 timestamp);
+
     struct LotteryStructure {
         uint256 id;
         bool isOver;
@@ -25,13 +28,17 @@ contract Lottery {
     mapping(bytes => uint256) public nameToId;
     mapping(uint256 => mapping(uint256 => address)) eachTicket; //nextId,ticket number,address - the same address can buy more than one ticket
 
-    function createLottery(bytes memory _name) external {
+    function createLottery(bytes memory _name) external payable {
+        require(
+            msg.value >= 0.001 ether,
+            "value must be equal or higher than 0.1 eth"
+        );
         lotteries[nextId] = LotteryStructure(
             nextId, //id
             false, //is over
             _name, //name
             block.timestamp + 10 minutes, //finish date
-            0, //currentBalance
+            msg.value, //currentBalance
             0.001 ether, //min bid
             0, // final result
             0 //total tickets sold
@@ -41,6 +48,8 @@ contract Lottery {
         nameToId[_name] = nextId;
 
         nextId++;
+
+        emit evCreateLottery(_name, msg.value, block.timestamp);
     }
 
     function redeemPrize(bytes memory _name) external {
@@ -49,12 +58,25 @@ contract Lottery {
             "Lottery is not over Yet"
         );
 
+        //GET THE RESULT FROM THE CHAINLINK FUNCTION HERE
+
+        require(
+            eachTicket[nameToId[_name]][
+                lotteries[nameToId[_name]].finalResult
+            ] == msg.sender,
+            "YOU ARE NOT THE WINNER"
+        );
+
         lotteries[nameToId[_name]].isOver = true;
         uint256 brutePrize = lotteries[nameToId[_name]].finalResult;
-        lotteries[nameToId[_name]].finalResult = 0;
+        // lotteries[nameToId[_name]].finalResult = 0; //dont need to set the chosen number to 0
         payable(msg.sender).transfer(brutePrize);
 
-        //GET THE RESULT FROM THE CHAINLINK FUNCTION HERE
+        emit evWinner(msg.sender, brutePrize, block.timestamp);
+    }
+
+    function isOver(bytes memory _name) external view returns (bool) {
+        return lotteries[nameToId[_name]].finishDate >= block.timestamp;
     }
 
     function enterOnLottery(bytes memory _name, uint256 _ticketNumber)
@@ -73,12 +95,6 @@ contract Lottery {
             "time is up!"
         );
 
-        //checking if exists, maybe redundant
-        require(
-            lotteries[nameToId[_name]].finalResult > 0,
-            "This lottery does not exist"
-        );
-
         //checking if min bid is provided
         require(
             lotteries[nameToId[_name]].minBid >= 0.001 ether,
@@ -93,7 +109,5 @@ contract Lottery {
         lotteries[nextId].currentBalance += msg.value;
         lotteries[nextId].totalTicketsSold += 1;
         eachTicket[nextId][_ticketNumber] = msg.sender;
-
-        // mapping(uint256 => mapping(uint256 => address)) eachTicket; //nextId,ticket number,address - the same address can buy more than one ticket
     }
 }

@@ -1,10 +1,13 @@
 const Random = artifacts.require("RandomNumberConsumer");
 const LinkToken = artifacts.require("LinkToken");
+const Lottery = artifacts.require("Lottery");
 
 module.exports = async () => {
   try {
     const [account] = await web3.eth.getAccounts();
     const vrn = await Random.deployed();
+    const lottery = await Lottery.deployed();
+
     const LINK_ABI = [
       {
         constant: true,
@@ -233,6 +236,36 @@ module.exports = async () => {
       "0xa36085F69e2889c224210F603D836748e7dC0088"
     );
 
+    //   function isOver(bytes memory _name) external view returns (bool) {
+    //     return lotteries[nameToId[_name]].finishDate >= block.timestamp;
+    // }
+
+    const value = await web3.utils.toWei("0.01");
+
+    const tx = await lottery.createLottery("one", {
+      from: account,
+      value: value,
+    });
+
+    console.log(tx);
+    // function createLottery(bytes memory _name) external payable {
+
+    // lottery.events
+    //   .evCreateLottery({})
+    //   .on("data", async function (event) {
+    //     console.log(event.returnValues);
+    //     // Do something here
+    //   })
+    //   .on("error", console.error);
+
+    // lottery.events
+    //   .evWinner({})
+    //   .on("data", async function (event) {
+    //     console.log(event.returnValues);
+    //     // Do something here
+    //   })
+    //   .on("error", console.error);
+
     // const tx = await vrn.getRandomNumber();
     // console.log(tx);
 
@@ -241,7 +274,8 @@ module.exports = async () => {
     // console.log(BigInt(randomResult).toString());
     console.log(BigInt(randomResult).toString().slice(0, 2));
 
-    // console.log(vrn.address);
+    Lottery;
+
     // console.log(await linkToken.methods.balanceOf(account).call());
     // console.log(account);
     // console.log(linkToken);
