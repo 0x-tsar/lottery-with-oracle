@@ -241,8 +241,6 @@ module.exports = async () => {
     // console.log(BigInt(randomResult).toString());
     console.log(BigInt(randomResult).toString().slice(0, 2));
 
-    // let a = 1.245641232134566e10;
-
     // console.log(vrn.address);
     // console.log(await linkToken.methods.balanceOf(account).call());
     // console.log(account);
