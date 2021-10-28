@@ -17,21 +17,24 @@ contract Lottery {
         uint256 currentBalance;
         uint256 minBid;
         uint256 finalResult;
+        uint256 totalTicketsSold;
     }
 
     mapping(uint256 => LotteryStructure) public lotteries;
     mapping(uint256 => bytes) public idToName;
     mapping(bytes => uint256) public nameToId;
+    mapping(uint256 => mapping(uint256 => address)) eachTicket; //nextId,ticket number,address - the same address can buy more than one ticket
 
     function createLottery(bytes memory _name) external {
         lotteries[nextId] = LotteryStructure(
-            nextId,
-            false,
-            _name,
-            block.timestamp + 10 minutes,
-            0,
-            0.001 ether,
-            0
+            nextId, //id
+            false, //is over
+            _name, //name
+            block.timestamp + 10 minutes, //finish date
+            0, //currentBalance
+            0.001 ether, //min bid
+            0, // final result
+            0 //total tickets sold
         );
 
         idToName[nextId] = _name;
@@ -40,18 +43,57 @@ contract Lottery {
         nextId++;
     }
 
-    function enterOnLottery(bytes memory _name) external {
+    function enterOnLottery(bytes memory _name, uint256 _ticketNumber)
+        external
+        payable
+    {
         //checking if is over
+        // require(
+        //     !lotteries[nameToId[_name]].isOver,
+        //     "This lottery is over! Check [FUNC] to check who is the winner"
+        // );
+
         require(
-            !lotteries[nameToId[_name]].isOver,
-            "This lottery is over! Check [FUNC] to check who is the winner"
+            lotteries[nameToId[_name]].finishDate >= block.timestamp,
+            "time is up!"
         );
+
         //checking if exists, maybe redundant
         require(
             lotteries[nameToId[_name]].finalResult > 0,
             "This lottery does not exist"
         );
 
-        //
+        //checking if min bid is provided
+        require(
+            lotteries[nameToId[_name]].minBid >= 0.001 ether,
+            "MININMAL BID WAS NOT MET!"
+        );
+
+        require(
+            eachTicket[nameToId[_name]][_ticketNumber] != address(0),
+            "This ticket was already taken"
+        );
+
+        //FROM HERE
+        lotteries[nextId] = LotteryStructure(
+            nextId, //id
+            false, //is over
+            _name, //name
+            block.timestamp + 10 minutes, //finish date
+            0, //currentBalance
+            0.001 ether, //min bid
+            0, // final result
+            0 //total tickets sold
+        );
+
+        lotteries[nextId].currentBalance += msg.value;
+        lotteries[nextId].totalTicketsSold += 1;
+        eachTicket[nextId][_ticketNumber] = msg.sender;
+        // mapping(uint256 => mapping(uint256 => address)) eachTicket; //nextId,ticket number,address - the same address can buy more than one ticket
+
+        nextId++;
+
+        // require(abi.encodePacked().length > 0, "NUMBER ALREADY PICKET");
     }
 }
