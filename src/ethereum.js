@@ -12,9 +12,9 @@ export const loadEthereum = async () =>
       if (chainId !== "42") {
         alert("change to 42 network");
       } else {
-        const cards = new web3.eth.Contract(
-          Cards.abi,
-          Cards.networks[chainId].address
+        const lottery = new web3.eth.Contract(
+          Lottery.abi,
+          Lottery.networks[chainId].address
         );
 
         window.ethereum.on("chainChanged", (change) => {
@@ -26,8 +26,8 @@ export const loadEthereum = async () =>
           window.location.reload();
         });
 
-        resolve({ cards, web3 });
+        resolve({ lottery, web3 });
       }
-      resolve({ cards: undefined, web3: undefined });
+      resolve({ lottery: undefined, web3: undefined });
     });
   });
