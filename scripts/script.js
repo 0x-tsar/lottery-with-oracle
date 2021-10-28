@@ -230,11 +230,15 @@ module.exports = async () => {
       LINK_ABI,
       "0xa36085F69e2889c224210F603D836748e7dC0088"
     );
+    // 0x66AA4B0ac1cce153F298e619211c867915821C72  vrn address
 
-    // const random = await vrn.getRandomNumber();
+    // await vrn.getRandomNumber();
+    const random = await vrn.randomResult.call();
+    console.log(random.words[0]);
+
     // console.log(random);
 
-    console.log(await linkToken.methods.balanceOf(vrn.address).call());
+    // console.log(await linkToken.methods.balanceOf(vrn.address).call());
     // console.log(
     //   await linkToken.methods
     //     .balanceOf("0xa36085F69e2889c224210F603D836748e7dC0088")
